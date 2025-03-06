@@ -9,9 +9,9 @@ const media = [
 ];
 let mediaIndex = 0;
 const relationshipStart = new Date("2023-02-28T14:00:00");
-const heartInterval = 300; // Milissegundos
-const mediaInterval = 4000; // Milissegundos
-const counterInterval = 1000; // Milissegundos
+const heartInterval = 300;
+const mediaInterval = 4000;
+const counterInterval = 1000;
 
 // Elementos do DOM
 const carouselContainer = document.querySelector(".carousel");
@@ -24,25 +24,36 @@ const createElement = (tag, attributes = {}) => {
     return element;
 };
 
-const appendChildren = (parent, children) => {
-    children.forEach(child => parent.appendChild(child));
-};
-
 // Funções principais
 const changeMedia = () => {
-    const newMedia = media[mediaIndex];
-    const newElement = createElement(newMedia.endsWith(".mp4") ? "video" : "img", {
-        src: newMedia,
-        className: "carousel-media",
-        id: "carousel-media",
-        alt: "Casal",
-        autoplay: newMedia.endsWith(".mp4"),
-        loop: newMedia.endsWith(".mp4"),
-        muted: newMedia.endsWith(".mp4"),
-    });
+    const currentMedia = document.getElementById("carousel-media");
+    currentMedia.classList.add("fade-out"); // Adiciona a classe fade-out
 
-    carouselContainer.replaceChild(newElement, document.getElementById("carousel-media"));
-    mediaIndex = (mediaIndex + 1) % media.length;
+    setTimeout(() => {
+        const newMedia = media[mediaIndex];
+        const newElement = createElement(newMedia.endsWith(".mp4") ? "video" : "img", {
+            src: newMedia,
+            className: "carousel-media",
+            id: "carousel-media",
+            alt: "Casal",
+            autoplay: newMedia.endsWith(".mp4"),
+            loop: newMedia.endsWith(".mp4"),
+            muted: newMedia.endsWith(".mp4"),
+        });
+
+        carouselContainer.replaceChild(newElement, currentMedia);
+        mediaIndex = (mediaIndex + 1) % media.length;
+
+        // Garante que a nova imagem esteja carregada antes de remover a classe fade-out
+        newElement.onload = () => {
+            newElement.classList.remove("fade-out");
+        };
+        // No caso de ser um video, o evento onload não funciona, então vamos usar o evento loadeddata
+        newElement.addEventListener('loadeddata', () => {
+            newElement.classList.remove("fade-out");
+        });
+
+    }, 1000); // Espera 1 segundo para a transição de fade-out
 };
 
 const updateCounter = () => {
@@ -86,19 +97,21 @@ const updateCounter = () => {
 };
 
 const createHeart = () => {
-    const heart = createElement("div", {
-        innerHTML: "❤️",
-        className: "heart",
-        style: {
-            left: `${Math.random() * window.innerWidth}px`,
-            top: "-10vh",
-            fontSize: `${Math.random() * 20 + 10}px`, // Variação de tamanho
-            animationDuration: `${Math.random() * 2 + 3}s`, // Variação de velocidade
-        },
-    });
+    const heart = document.createElement('div');
+    heart.innerHTML = '❤️';
+    heart.className = 'heart';
+    heart.style.left = `${Math.random() * window.innerWidth}px`;
+    heart.style.top = '-10vh';
+    heart.style.fontSize = `${Math.random() * 20 + 10}px`;
+    heart.style.animationDuration = `${Math.random() * 2 + 3}s`;
+    heart.style.opacity = Math.random() * 0.5 + 0.5; // Variação de opacidade
+    heart.style.transform = `rotate(${Math.random() * 360}deg)`; // Variação de rotação
 
     document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), Number.parseFloat(heart.style.animationDuration) * 1000);
+
+    heart.addEventListener('animationend', () => {
+        heart.remove();
+    });
 };
 
 // Inicialização
