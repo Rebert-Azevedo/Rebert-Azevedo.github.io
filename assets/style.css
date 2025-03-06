@@ -1,107 +1,108 @@
 :root {
-	--bg-color: #121212;
-	--text-color: white;
-	--heart-color: red;
-	--counter-bg: rgba(255, 255, 255, 0.1);
-	--counter-shadow: rgba(255, 255, 255, 0.3);
-	--font-size-message: 20px;
-	--font-size-counter: 22px;
-	--font-size-extra: 18px;
+    --bg-color: #121212;
+    --text-color: white;
+    --heart-color: red;
+    --counter-bg: rgba(255, 255, 255, 0.1);
+    --counter-shadow: rgba(255, 255, 255, 0.3);
+    --font-size-message: 20px;
+    --font-size-counter: 22px;
+    --font-size-extra: 18px;
 }
 
 * {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	min-height: 100vh; /* Alterado para min-height */
-	background-color: var(--bg-color);
-	font-family: Arial, sans-serif;
-	text-align: center;
-	color: var(--text-color);
-	margin: 0;
-	padding: 20px;
-	overflow-x: hidden; /* Adicionado para evitar rolagem horizontal */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
 }
 
 h1 {
-	font-size: 1.8em; /* Tamanho ajustado para dispositivos móveis */
-	margin-bottom: 20px;
+    font-size: 1.8em;
+    margin-bottom: 20px;
 }
 
 .carousel {
-	width: 90%;
-	max-width: 400px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-bottom: 20px;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .carousel-media {
-	width: 100%;
-	height: auto;
-	object-fit: contain;
-	border-radius: 10px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 .message {
-	font-size: 1em; /* Tamanho ajustado para dispositivos móveis */
-	margin-top: 20px;
-	font-weight: bold;
+    font-size: 1em;
+    margin-top: 20px;
+    font-weight: bold;
 }
 
 .counter {
-	margin-top: 20px;
-	font-size: 1em; /* Tamanho ajustado para dispositivos móveis */
-	font-weight: bold;
-	background: var(--counter-bg);
-	padding: 15px;
-	border-radius: 10px;
-	box-shadow: 0 2px 5px var(--counter-shadow);
+    margin-top: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    background: var(--counter-bg);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px var(--counter-shadow);
 }
 
 .extra-messages {
-	margin-top: 20px;
-	font-size: 0.9em; /* Tamanho ajustado para dispositivos móveis */
-	font-style: italic;
-	opacity: 0.8;
+    margin-top: 20px;
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0.8;
 }
 
 .heart {
-	position: absolute;
-	color: var(--heart-color);
-	font-size: 20px;
-	opacity: 0.7;
-	animation: fall linear;
+    position: absolute;
+    color: var(--heart-color);
+    animation: fall linear;
 }
 
 @keyframes fall {
-	to {
-		transform: translateY(100vh);
-		opacity: 0;
-	}
+    to {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
 }
 
-/* Media Query para telas menores */
 @media (max-width: 600px) {
-	:root {
-		--font-size-message: 18px;
-		--font-size-counter: 20px;
-		--font-size-extra: 16px;
-	}
+    :root {
+        --font-size-message: 18px;
+        --font-size-counter: 20px;
+        --font-size-extra: 16px;
+    }
 
-	.carousel {
-		width: 95%;
-	}
+    .carousel {
+        width: 95%;
+    }
 
-	.counter {
-		padding: 10px;
-	}
+    .counter {
+        padding: 10px;
+    }
+}
+
+.youtube-video {
+    margin-top: 30px;
 }

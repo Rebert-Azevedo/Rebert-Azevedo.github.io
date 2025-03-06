@@ -1,175 +1,108 @@
+// Dados e configurações
 const media = [
-	"assets/imgs/img_1.jpg",
-	"assets/imgs/img_2.jpg",
-	"assets/imgs/img_3.jpg",
-	"assets/imgs/img_4.jpg",
-	"assets/imgs/img_5.jpeg",
-	"assets/imgs/Nos.mp4",
+    "assets/imgs/img_1.jpg",
+    "assets/imgs/img_2.jpg",
+    "assets/imgs/img_3.jpg",
+    "assets/imgs/img_4.jpg",
+    "assets/imgs/img_5.jpeg",
+    "assets/imgs/Nos.mp4",
 ];
-let index = 0;
+let mediaIndex = 0;
+const relationshipStart = new Date("2023-02-28T14:00:00");
+const heartInterval = 300; // Milissegundos
+const mediaInterval = 4000; // Milissegundos
+const counterInterval = 1000; // Milissegundos
 
-function changeMedia() {
-	const carouselContainer = document.querySelector(".carousel");
-	const currentMedia = document.getElementById("carousel-media");
-	const newMedia = media[index];
+// Elementos do DOM
+const carouselContainer = document.querySelector(".carousel");
+const counterElement = document.getElementById("counter");
 
-	const newElement = newMedia.endsWith(".mp4")
-		? document.createElement("video")
-		: document.createElement("img");
-	newElement.src = newMedia;
-	newElement.classList.add("carousel-media");
-	newElement.id = "carousel-media";
+// Funções utilitárias
+const createElement = (tag, attributes = {}) => {
+    const element = document.createElement(tag);
+    Object.keys(attributes).forEach(key => element[key] = attributes[key]);
+    return element;
+};
 
-	if (newMedia.endsWith(".mp4")) {
-		newElement.autoplay = true;
-		newElement.loop = true;
-		newElement.muted = true;
-	} else {
-		newElement.alt = "Casal";
-	}
-	carouselContainer.replaceChild(newElement, currentMedia);
-	index = (index + 1) % media.length;
-}
+const appendChildren = (parent, children) => {
+    children.forEach(child => parent.appendChild(child));
+};
 
-setInterval(changeMedia, 4000);
+// Funções principais
+const changeMedia = () => {
+    const newMedia = media[mediaIndex];
+    const newElement = createElement(newMedia.endsWith(".mp4") ? "video" : "img", {
+        src: newMedia,
+        className: "carousel-media",
+        id: "carousel-media",
+        alt: "Casal",
+        autoplay: newMedia.endsWith(".mp4"),
+        loop: newMedia.endsWith(".mp4"),
+        muted: newMedia.endsWith(".mp4"),
+    });
 
-const RELATIONSHIP_START = new Date("2023-02-28T14:00:00");
+    carouselContainer.replaceChild(newElement, document.getElementById("carousel-media"));
+    mediaIndex = (mediaIndex + 1) % media.length;
+};
 
-function updateCounter() {
-	const now = new Date();
-	const start = new Date(RELATIONSHIP_START);
-
-	// Diferença de anos, meses e dias
-	let years = now.getFullYear() - start.getFullYear();
-	let months = now.getMonth() - start.getMonth();
-	let days = now.getDate() - start.getDate();
-
-	// Ajuste se o mês ainda não completou
-	if (months < 0) {
-		years--;
-		months += 12;
-	}
-
-	// Ajuste se os dias ainda não completaram
-	if (days < 0) {
-		const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-		days += previousMonth.getDate();
-		months--;
-
-		if (months < 0) {
-			years--;
-			months += 12;
-		}
-	}
-
-	// Calcula horas, minutos e segundos corretamente
-	let hours = now.getHours() - start.getHours();
-	let minutes = now.getMinutes() - start.getMinutes();
-	let seconds = now.getSeconds() - start.getSeconds();
-
-	// Ajusta valores negativos nas horas/minutos/segundos
-	if (seconds < 0) {
-		seconds += 60;
-		minutes--;
-	}
-	if (minutes < 0) {
-		minutes += 60;
-		hours--;
-	}
-	if (hours < 0) {
-		hours += 24;
-		days--;
-	}
-
-	document.getElementById("counter").innerHTML =
-		`${years} anos, ${months} meses, ${days} dias, <br>${hours}h ${minutes}m ${seconds}s`;
-}
-
-// Atualiza o contador a cada segundo
-setInterval(updateCounter, 1000);
-updateCounter();
-
-
-
-
-setInterval(updateCounter, 900);
-
-function createHeart() {
-	const heart = document.createElement("div");
-	heart.innerHTML = "❤️";
-	heart.classList.add("heart");
-	heart.style.left = `${Math.random() * window.innerWidth}px`;
-	heart.style.top = "-10vh";
-	heart.style.animationDuration = `${Math.random() * 2 + 3}s`;
-	document.body.appendChild(heart);
-	setTimeout(() => {
-		if (heart?.parentNode) {
-			heart.parentNode.removeChild(heart);
-		}
-	}, Number.parseFloat(heart.style.animationDuration) * 1000);
-}
-
-setInterval(createHeart, 300);
-
-
-
-
-
-
-/*const media = [
-    "assets/imgs/img_1.jpg", "assets/imgs/img_2.jpg", "assets/imgs/img_3.jpg", 
-    "assets/imgs/img_4.jpg", "assets/imgs/img_5.jpeg", "assets/imgs/Nos.mp4"
-];
-
-let index = 0;
-
-function changeMedia() {
-    const carouselContainer = document.querySelector(".carousel");
-    const currentMedia = document.getElementById("carousel-media");
-    const newMedia = media[index];
-
-    if (newMedia.endsWith(".mp4")) {
-        const videoElement = document.createElement("video");
-        videoElement.src = newMedia;
-        videoElement.autoplay = true;
-        videoElement.loop = true;
-        videoElement.muted = true;
-        videoElement.classList.add("carousel-media");
-
-        carouselContainer.replaceChild(videoElement, currentMedia);
-        videoElement.id = "carousel-media";
-    } else {
-        const imgElement = document.createElement("img");
-        imgElement.src = newMedia;
-        imgElement.alt = "Casal";
-        imgElement.classList.add("carousel-media");
-
-        carouselContainer.replaceChild(imgElement, currentMedia);
-        imgElement.id = "carousel-media";
-    }
-    
-    index = (index + 1) % media.length;
-}
-
-setInterval(changeMedia, 4000);
-
-const RELATIONSHIP_START = new Date("2023-02-25T00:00:00");
-
-function updateCounter() {
+const updateCounter = () => {
     const now = new Date();
-    const diff = now - RELATIONSHIP_START;
+    const diff = {
+        years: now.getFullYear() - relationshipStart.getFullYear(),
+        months: now.getMonth() - relationshipStart.getMonth(),
+        days: now.getDate() - relationshipStart.getDate(),
+        hours: now.getHours() - relationshipStart.getHours(),
+        minutes: now.getMinutes() - relationshipStart.getMinutes(),
+        seconds: now.getSeconds() - relationshipStart.getSeconds(),
+    };
 
-    const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
-    const months = Math.floor((diff / (1000 * 60 * 60 * 24 * 30)) % 12);
-    const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30);
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-    const milliseconds = diff % 1000;
+    if (diff.months < 0) {
+        diff.years--;
+        diff.months += 12;
+    }
+    if (diff.days < 0) {
+        const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        diff.days += previousMonth.getDate();
+        diff.months--;
+        if (diff.months < 0) {
+            diff.years--;
+            diff.months += 12;
+        }
+    }
+    if (diff.seconds < 0) {
+        diff.seconds += 60;
+        diff.minutes--;
+    }
+    if (diff.minutes < 0) {
+        diff.minutes += 60;
+        diff.hours--;
+    }
+    if (diff.hours < 0) {
+        diff.hours += 24;
+        diff.days--;
+    }
 
-    document.getElementById("counter").innerHTML = 
-        `${years} anos, ${months} meses, ${days} dias, <br>` +
-        `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
-}
+    counterElement.innerHTML = `${diff.years} anos, ${diff.months} meses, ${diff.days} dias, <br>${diff.hours}h ${diff.minutes}m ${diff.seconds}s`;
+};
 
-setInterval(updateCounter, 1);*/
+const createHeart = () => {
+    const heart = createElement("div", {
+        innerHTML: "❤️",
+        className: "heart",
+        style: {
+            left: `${Math.random() * window.innerWidth}px`,
+            top: "-10vh",
+            fontSize: `${Math.random() * 20 + 10}px`, // Variação de tamanho
+            animationDuration: `${Math.random() * 2 + 3}s`, // Variação de velocidade
+        },
+    });
+
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), Number.parseFloat(heart.style.animationDuration) * 1000);
+};
+
+// Inicialização
+setInterval(changeMedia, mediaInterval);
+setInterval(updateCounter, counterInterval);
+setInterval(createHeart, heartInterval);
+updateCounter();
