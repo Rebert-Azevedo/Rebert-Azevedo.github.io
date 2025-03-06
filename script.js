@@ -25,9 +25,9 @@ const createElement = (tag, attributes = {}) => {
 };
 
 // Funções principais
-const changeMedia = () => {
+const updateCarousel = () => {
     const currentMedia = document.getElementById("carousel-media");
-    currentMedia.classList.add("fade-out"); // Adiciona a classe fade-out
+    currentMedia.classList.add("fade-out");
 
     setTimeout(() => {
         const newMedia = media[mediaIndex];
@@ -44,16 +44,18 @@ const changeMedia = () => {
         carouselContainer.replaceChild(newElement, currentMedia);
         mediaIndex = (mediaIndex + 1) % media.length;
 
-        // Garante que a nova imagem esteja carregada antes de remover a classe fade-out
         newElement.onload = () => {
             newElement.classList.remove("fade-out");
         };
-        // No caso de ser um video, o evento onload não funciona, então vamos usar o evento loadeddata
+
         newElement.addEventListener('loadeddata', () => {
             newElement.classList.remove("fade-out");
         });
+    }, 1000);
+};
 
-    }, 1000); // Espera 1 segundo para a transição de fade-out
+const changeMedia = () => {
+    updateCarousel();
 };
 
 const updateCounter = () => {
@@ -104,8 +106,8 @@ const createHeart = () => {
     heart.style.top = '-10vh';
     heart.style.fontSize = `${Math.random() * 20 + 10}px`;
     heart.style.animationDuration = `${Math.random() * 2 + 3}s`;
-    heart.style.opacity = Math.random() * 0.5 + 0.5; // Variação de opacidade
-    heart.style.transform = `rotate(${Math.random() * 360}deg)`; // Variação de rotação
+    heart.style.opacity = Math.random() * 0.5 + 0.5;
+    heart.style.transform = `rotate(${Math.random() * 360}deg)`;
 
     document.body.appendChild(heart);
 
