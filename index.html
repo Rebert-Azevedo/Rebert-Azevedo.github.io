@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferência de Saldos de Implantação</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>📊 Conferência de Saldos de Implantação</h2>
+        <p>Auditoria de Saldos: Dezembro/2024 vs Janeiro/2025</p>
+    </header>
+
+    <div class="upload-section">
+        <div class="input-group">
+            <label for="fileDez">Razão Dezembro (Saldo Atual)</label>
+            <input type="file" id="fileDez" accept=".xlsx, .xls">
+        </div>
+        <div class="input-group">
+            <label for="fileJan">Razão Janeiro (Saldo Anterior)</label>
+            <input type="file" id="fileJan" accept=".xlsx, .xls">
+        </div>
+    </div>
+
+    <button id="btnProcessar" onclick="processarArquivos()">Gerar Relatório de Conferência</button>
+
+    <div id="resultadoArea" style="display:none;">
+        <div id="statusBox" class="summary"></div>
+
+        <div class="filter-section">
+            <button onclick="filtrarTabela('TODOS')" style="background: #636e72;">Todas</button>
+            <button onclick="filtrarTabela('DIVERGENTE')" style="background: #d63031;">Divergentes</button>
+            <button onclick="filtrarTabela('OK')" style="background: #27ae60;">Corretas</button>
+            <button onclick="filtrarTabela('SINTETICA')" style="background: #8e44ad;">Sintéticas</button>
+            <button onclick="filtrarTabela('ANALITICA')" style="background: #3b82f6;">Analíticas</button>
+        </div>
+
+        <table id="tabelaResultados">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Conta Contábil</th>
+                    <th>Saldo Dez/24</th>
+                    <th>Saldo Jan/25</th>
+                    <th>Diferença</th>
+                    <th>Situação</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
