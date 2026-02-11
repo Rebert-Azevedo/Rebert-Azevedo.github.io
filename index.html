@@ -12,7 +12,7 @@
 <div class="container">
     <header>
         <h2>📊 Conferência de Saldos de Implantação</h2>
-        <p>Auditoria de Saldos: Dezembro/2024 vs Janeiro/2025</p>
+        <p>Auditoria: Dezembro/2024 vs Janeiro/2025</p>
     </header>
 
     <div class="upload-section">
@@ -32,11 +32,13 @@
         <div id="statusBox" class="summary"></div>
 
         <div class="filter-section">
-            <button onclick="filtrarTabela('TODOS')" style="background: #636e72;">Todas</button>
-            <button onclick="filtrarTabela('DIVERGENTE')" style="background: #d63031;">Divergentes</button>
-            <button onclick="filtrarTabela('OK')" style="background: #27ae60;">Corretas</button>
-            <button onclick="filtrarTabela('SINTETICA')" style="background: #8e44ad;">Sintéticas</button>
-            <button onclick="filtrarTabela('ANALITICA')" style="background: #3b82f6;">Analíticas</button>
+            <button id="btn-TODOS" onclick="setFiltro('STATUS', 'TODOS')" class="active" style="background: #636e72;">Todas Situações</button>
+            <button id="btn-DIVERGENTE" onclick="setFiltro('STATUS', 'DIVERGENTE')" style="background: #d63031;">Divergentes</button>
+            <button id="btn-OK" onclick="setFiltro('STATUS', 'OK')" style="background: #27ae60;">Corretas</button>
+            <div style="width: 100%; height: 5px; display: block;"></div>
+            <button id="btn-T-TODOS" onclick="setFiltro('TIPO', 'TODOS')" class="active" style="background: #636e72;">Todos os Tipos</button>
+            <button id="btn-ANALITICA" onclick="setFiltro('TIPO', 'ANALITICA')" style="background: #3b82f6;">Analíticas</button>
+            <button id="btn-SINTETICA" onclick="setFiltro('TIPO', 'SINTETICA')" style="background: #8e44ad;">Sintéticas</button>
         </div>
 
         <table id="tabelaResultados">
@@ -44,6 +46,7 @@
                 <tr>
                     <th>Tipo</th>
                     <th>Conta Contábil</th>
+                    <th>C. Bancária</th>
                     <th>Saldo Dez/24</th>
                     <th>Saldo Jan/25</th>
                     <th>Diferença</th>
@@ -51,6 +54,7 @@
                 </tr>
             </thead>
             <tbody id="corpoTabela"></tbody>
+            <tfoot id="peTabela"></tfoot>
         </table>
     </div>
 </div>
