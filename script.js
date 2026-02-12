@@ -35,10 +35,20 @@ function aplicarMascaraExibicao(conta) {
 
 function extrairInfoConta(original) {
   let str = original.toString().trim();
-  let match = str.match(/^(\d{1,15})(.*)$/);
-  return match
-    ? { contabil: match[1], bancaria: match[2].replace(/^\.+/, "") }
-    : { contabil: str, bancaria: "" };
+  
+  // 1. Tenta separar por espaço (ex: "1.1.1.1.1 12345")
+  let parts = str.split(/\s+(.+)/);
+  if (parts.length > 1 && parts[1].trim()) {
+    return { contabil: parts[0].replace(/\./g, ""), bancaria: parts[1].trim() };
+  }
+
+  // 2. Se não tem espaço, verifica se excede 15 dígitos (padrão PCASP)
+  let raw = str.replace(/\./g, "");
+  if (raw.length > 15) {
+    return { contabil: raw.substring(0, 15), bancaria: raw.substring(15) };
+  }
+
+  return { contabil: raw, bancaria: "" };
 }
 
 function limparValorContabil(valor) {
@@ -49,9 +59,52 @@ function limparValorContabil(valor) {
   return parseFloat(str.replace(/[^\d.-]/g, "")) || 0;
 }
 
+function getContaSignificativa(contaRaw) {
+  // Máscara PCASP: 1, 1, 1, 1, 1, 2, 2, 2, 2, 2
+  const niveis = [1, 2, 3, 4, 5, 7, 9, 11, 13, 15];
+  let len = contaRaw.length;
+  for (let i = niveis.length - 1; i >= 0; i--) {
+    const fim = niveis[i];
+    const inicio = i === 0 ? 0 : niveis[i - 1];
+    if (fim > len) continue;
+    const parte = contaRaw.substring(inicio, fim);
+    if (parseInt(parte, 10) !== 0) {
+      return contaRaw.substring(0, fim);
+    }
+  }
+  return contaRaw.replace(/0+$/, "");
+}
+
 async function processarArquivos() {
-  const fDez = document.getElementById("fileDez").files[0];
-  const fJan = document.getElementById("fileJan").files[0];
+  const fDez = document.getElementById("arquivoAnterior").files[0];
+  const fJan = document.getElementById("arquivoAtual").files[0];
+
+  // Função auxiliar para ler um valor de célula específica do Excel
+  async function lerValorCelula(file, cell) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const cellValue = sheet[cell] ? sheet[cell].v : "";
+        resolve(cellValue);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  // Ler os nomes das entidades das células C1 dos arquivos
+  const nomecompetenciaAnterior = await lerValorCelula(fDez, "C1");
+  const nomecompetenciaAtual = await lerValorCelula(fJan, "C1");
+
+  // Atualizar os labels com os nomes das entidades
+  document.getElementById("competenciaAnterior").innerText = nomecompetenciaAnterior;
+  document.getElementById("competenciaAtual").innerText = nomecompetenciaAtual;
+
+
+
   if (!fDez || !fJan) return alert("Selecione os arquivos!");
 
   const rowsDez = await lerExcel(fDez);
@@ -106,13 +159,14 @@ async function processarArquivos() {
 
   todasContasRaw.forEach((rawAtual, i) => {
     const info = extrairInfoConta(rawAtual);
-    const raizAtual = info.contabil.replace(/0+$/, "");
+    const raizAtual = getContaSignificativa(info.contabil);
     const sProx = (todasContasRaw[i + 1] || "").toString().replace(/\D/g, "");
+    
     const tipo =
-      sProx.startsWith(raizAtual) && raizAtual !== ""
+      sProx.startsWith(raizAtual) && sProx.length > raizAtual.length
         ? "SINTETICA"
         : "ANALITICA";
-    const ehGrupoPai = tipo === "SINTETICA" && raizAtual.length === 1;
+    const ehGrupoPai = tipo === "SINTETICA";
 
     const vDez = mapaDez[rawAtual] || 0,
       vJan = mapaJan[rawAtual] || 0;
@@ -132,14 +186,14 @@ async function processarArquivos() {
       tr.setAttribute("data-status", sit);
       tr.setAttribute("data-tipo", tipo);
       tr.setAttribute("data-path", info.contabil);
-      tr.setAttribute("data-root", raizAtual[0]);
+      tr.setAttribute("data-root", raizAtual);
 
       if (raizAtual.length > 1) tr.classList.add("row-hidden");
 
       if (ehGrupoPai) {
         tr.className = "row-sintetica collapsed";
         if (temErroInterno) tr.classList.add("tem-erro-filho");
-        tr.onclick = () => toggleGrupo(raizAtual[0], tr);
+        tr.onclick = () => toggleGrupo(raizAtual, tr);
       } else if (tipo === "SINTETICA" && temErroInterno) {
         tr.classList.add("tem-erro-filho");
         tr.classList.add("row-sintetica");
@@ -152,7 +206,6 @@ async function processarArquivos() {
         divTotal++;
       }
 
-      // Ícone apenas se for Grupo Pai (Minimizável)
       const icone = ehGrupoPai
         ? '<span class="group-icon">▼</span>'
         : '<span style="margin-right:24px"></span>';
@@ -178,24 +231,56 @@ async function processarArquivos() {
     `Divergências Analíticas: ${divTotal}`;
 }
 
-function toggleGrupo(numGrupo, elPai) {
-  const recolher = elPai.classList.toggle("collapsed");
-  document.querySelectorAll("#corpoTabela tr").forEach((linha) => {
-    const root = linha.getAttribute("data-root");
-    const path = linha.getAttribute("data-path").replace(/0+$/, "");
-    if (root === numGrupo && path.length > 1)
+function toggleGrupo(raizPai, elPai) {
+  const rows = Array.from(document.querySelectorAll("#corpoTabela tr"));
+  const isCollapsed = elPai.classList.contains("collapsed");
+
+  let childrenVisible = false;
+  const firstChild = rows.find((r) => {
+    if (r === elPai) return false;
+    const path = r.getAttribute("data-path");
+    return path && path.startsWith(raizPai + ".");
+  });
+
+  if (firstChild) {
+    childrenVisible =
+      !firstChild.classList.contains("row-hidden") &&
+      firstChild.style.display !== "none";
+  }
+
+  const recolher = !isCollapsed || childrenVisible;
+
+  elPai.classList.toggle("collapsed", recolher);
+
+  rows.forEach((linha) => {
+    if (linha === elPai) return;
+    const path = linha.getAttribute("data-path");
+    if (path && path.startsWith(raizPai + "."))
       linha.classList.toggle("row-hidden", recolher);
   });
 }
 
 function recolherTudo() {
-  document.querySelectorAll(".row-sintetica").forEach((el) => {
-    if (!el.classList.contains("collapsed")) el.click();
+  const rows = document.querySelectorAll("#corpoTabela tr");
+  rows.forEach((row) => {
+    const raiz = row.getAttribute("data-root");
+    if (!raiz) return;
+
+    if (row.classList.contains("row-sintetica")) row.classList.add("collapsed");
+
+    if (raiz.length === 1) {
+      row.classList.remove("row-hidden");
+    } else {
+      row.classList.add("row-hidden");
+    }
   });
 }
 function expandirTudo() {
   document.querySelectorAll(".row-sintetica").forEach((el) => {
-    if (el.classList.contains("collapsed")) el.click();
+    el.classList.remove("collapsed");
+  });
+  document.querySelectorAll("#corpoTabela tr").forEach((el) => {
+    el.classList.remove("row-hidden");
   });
 }
 
@@ -215,10 +300,8 @@ function setFiltro(cat, val) {
 }
 
 function aplicarFiltros() {
-  const rows = Array.from(document.querySelectorAll("#corpoTabela tr"));
-  const matches = new Set();
+  const rows = document.querySelectorAll("#corpoTabela tr");
 
-  // 1. Identificar quais linhas atendem diretamente aos filtros
   rows.forEach((row) => {
     const sit = row.getAttribute("data-status");
     const tipo = row.getAttribute("data-tipo");
@@ -227,38 +310,15 @@ function aplicarFiltros() {
       filtrosAtivos.STATUS === "TODOS" ||
       filtrosAtivos.STATUS === "TODOS_STATUS" ||
       filtrosAtivos.STATUS === sit;
+
     const tipoMatch =
       filtrosAtivos.TIPO === "TODOS" ||
       filtrosAtivos.TIPO === "TODOS_TIPO" ||
       filtrosAtivos.TIPO === tipo;
 
     if (statusMatch && tipoMatch) {
-      const path = row.getAttribute("data-path");
-      const cleanPath = path.replace(/0+$/, "");
-      matches.add(cleanPath);
-    }
-  });
-
-  // 2. Calcular hierarquia: Se o filho aparece, os pais devem aparecer
-  const pathsToShow = new Set();
-  matches.forEach((p) => {
-    let curr = p;
-    while (curr.length > 0) {
-      pathsToShow.add(curr);
-      curr = curr.substring(0, curr.length - 1);
-    }
-  });
-
-  // 3. Aplicar visibilidade e garantir expansão
-  rows.forEach((row) => {
-    const path = row.getAttribute("data-path");
-    const cleanPath = path.replace(/0+$/, "");
-
-    if (pathsToShow.has(cleanPath)) {
       row.style.display = "";
       row.classList.remove("row-hidden");
-      if (row.classList.contains("row-sintetica"))
-        row.classList.remove("collapsed");
     } else {
       row.style.display = "none";
     }
