@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conferência de Saldos de Implantação</title>
+    <title>Conferência - Razão</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -12,7 +12,6 @@
 <div class="container">
     <header>
         <h2>📊 Conferência de Saldos de Implantação</h2>
-        <p>Auditoria: Dezembro/2024 vs Janeiro/2025</p>
     </header>
 
     <div class="upload-section">
@@ -26,19 +25,27 @@
         </div>
     </div>
 
-    <button id="btnProcessar" onclick="processarArquivos()">Gerar Relatório de Conferência</button>
+    <button id="btnProcessar" onclick="processarArquivos()">Gerar Conferência</button>
 
     <div id="resultadoArea" style="display:none;">
         <div id="statusBox" class="summary"></div>
 
         <div class="filter-section">
-            <button id="btn-TODOS" onclick="setFiltro('STATUS', 'TODOS')" class="active" style="background: #636e72;">Todas Situações</button>
-            <button id="btn-DIVERGENTE" onclick="setFiltro('STATUS', 'DIVERGENTE')" style="background: #d63031;">Divergentes</button>
-            <button id="btn-OK" onclick="setFiltro('STATUS', 'OK')" style="background: #27ae60;">Corretas</button>
-            <div style="width: 100%; height: 5px; display: block;"></div>
-            <button id="btn-T-TODOS" onclick="setFiltro('TIPO', 'TODOS')" class="active" style="background: #636e72;">Todos os Tipos</button>
-            <button id="btn-ANALITICA" onclick="setFiltro('TIPO', 'ANALITICA')" style="background: #3b82f6;">Analíticas</button>
-            <button id="btn-SINTETICA" onclick="setFiltro('TIPO', 'SINTETICA')" style="background: #8e44ad;">Sintéticas</button>
+            <div class="filter-group">
+                <span class="filter-label">Status:</span>
+                <button id="btn-TODOS_STATUS" onclick="setFiltro('STATUS', 'TODOS_STATUS')" class="filter-btn active">Todas</button>
+                <button id="btn-DIVERGENTE" onclick="setFiltro('STATUS', 'DIVERGENTE')" class="filter-btn">Divergentes</button>
+                <button id="btn-OK" onclick="setFiltro('STATUS', 'OK')" class="filter-btn">Corretas</button>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Tipo:</span>
+                <button id="btn-TODOS_TIPO" onclick="setFiltro('TIPO', 'TODOS_TIPO')" class="filter-btn active">Todas</button>
+                <button id="btn-SINTETICA" onclick="setFiltro('TIPO', 'SINTETICA')" class="filter-btn">Sintéticas</button>
+                <button id="btn-ANALITICA" onclick="setFiltro('TIPO', 'ANALITICA')" class="filter-btn">Analíticas</button>
+                <div style="flex-grow: 1;"></div> 
+                <button onclick="expandirTudo()" class="filter-btn">📂 Expandir Grupos</button>
+                <button onclick="recolherTudo()" class="filter-btn">📁 Recolher Grupos</button>
+            </div>
         </div>
 
         <table id="tabelaResultados">
@@ -46,6 +53,7 @@
                 <tr>
                     <th>Tipo</th>
                     <th>Conta Contábil</th>
+                    <th>Descrição (Dez)</th>
                     <th>C. Bancária</th>
                     <th>Saldo Dez/24</th>
                     <th>Saldo Jan/25</th>
